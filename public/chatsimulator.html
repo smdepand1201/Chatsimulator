@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat Simulator</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Sidebar -->
+    <div id="sidebar">
+      <div class="group" data-group-id="1">
+        <img src="downloads/stock.1.jpeg" alt="Group 1" class="group-image">
+        <span>COVID-19 Vaccines</span>
+      </div>
+      <div class="group" data-group-id="2">
+        <img src="downloads/stock.2.jpeg" alt="Group 2" class="group-image">
+        <span>Microplastics & Oceans</span>
+      </div>
+      <div class="group" data-group-id="3">
+        <img src="downloads/stock.3.jpeg" alt="Group 3" class="group-image">
+        <span>Media & Gaming</span>
+      </div>
+    </div>
+
+    <!-- Chat Area -->
+    <div id="chat-container">
+      <div id="warning-banner">
+        🚨 Attention: Fake news is currently being spread! 🚨
+      </div>
+      <div id="chat-window"></div>
+      <div id="chat-input-container">
+        <input id="chat-input" type="text" placeholder="Type your message...">
+        <button id="send-button">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="scripts.js"></script>
+</body>
+</html>
