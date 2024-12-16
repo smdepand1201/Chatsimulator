@@ -2,22 +2,24 @@
 let userName = '';
 let currentGroupId = 1;
 
-// Show popup warning
-const popup = document.getElementById("popup");
+// Show popup warning after 10 seconds
+setTimeout(() => {
+  document.getElementById("popup").style.display = "flex";
+}, 10000);
+
 const popupOkButton = document.getElementById("popup-ok-button");
 popupOkButton.addEventListener("click", () => {
-  popup.style.display = "none";
+  document.getElementById("popup").style.display = "none";
   document.getElementById("name-prompt").style.display = "flex";
 });
 
 // Name prompt
-const namePrompt = document.getElementById("name-prompt");
 const nameSubmitButton = document.getElementById("name-submit-button");
 nameSubmitButton.addEventListener("click", () => {
   const usernameInput = document.getElementById("username-input").value.trim();
   if (usernameInput) {
     userName = usernameInput;
-    namePrompt.style.display = "none";
+    document.getElementById("name-prompt").style.display = "none";
     document.getElementById("app").style.display = "flex";
     renderMessages(currentGroupId);
   }
@@ -41,15 +43,31 @@ const groupMessages = {
   ],
 };
 
-// Render Messages
+// Render Messages with Delay
 function renderMessages(groupId) {
   const chatWindow = document.getElementById("chat-window");
-  chatWindow.innerHTML = "";
-  groupMessages[groupId].forEach((message) => {
-    const messageDiv = document.createElement("div");
-    messageDiv.className = `message ${message.sender === userName ? "self" : "other"}`;
-    messageDiv.innerText = `${message.sender}: ${message.text}`;
-    chatWindow.appendChild(messageDiv);
+  chatWindow.innerHTML = ""; // Clear messages
+
+  const messages = groupMessages[groupId];
+  messages.forEach((message, index) => {
+    setTimeout(() => {
+      const messageDiv = document.createElement("div");
+      messageDiv.className = `message ${message.sender === userName ? "self" : "other"}`;
+
+      // Add photo and text
+      const image = document.createElement("img");
+      image.src = "images/people.1.jpeg";
+      image.alt = "User Photo";
+      image.className = "message-image";
+      messageDiv.appendChild(image);
+
+      const text = document.createElement("span");
+      text.innerText = `${message.sender}: ${message.text}`;
+      messageDiv.appendChild(text);
+
+      chatWindow.appendChild(messageDiv);
+      chatWindow.scrollTop = chatWindow.scrollHeight; // Auto-scroll
+    }, index * 5000); // 5-second delay per message
   });
 }
 
