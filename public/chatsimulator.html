@@ -7,28 +7,40 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <div id="popup" class="popup">
+    <div class="popup-content">
+      <p>🚨 Warning: Fake news may appear in this conversation.</p>
+      <button id="popup-ok-button">OK</button>
+    </div>
+  </div>
+
+  <div id="name-prompt" class="name-prompt">
+    <div class="name-prompt-content">
+      <p>Enter your name to join the chat:</p>
+      <input id="username-input" type="text" placeholder="Your name">
+      <button id="name-submit-button">Enter</button>
+    </div>
+  </div>
+
   <div id="app">
     <!-- Sidebar -->
     <div id="sidebar">
       <div class="group" data-group-id="1">
-        <img src="downloads/stock.1.jpeg" alt="Group 1" class="group-image">
+        <img src="images/stock.1.jpeg" alt="Group 1" class="group-image">
         <span>COVID-19 Vaccines</span>
       </div>
       <div class="group" data-group-id="2">
-        <img src="downloads/stock.2.jpeg" alt="Group 2" class="group-image">
+        <img src="images/stock.2.jpeg" alt="Group 2" class="group-image">
         <span>Microplastics & Oceans</span>
       </div>
       <div class="group" data-group-id="3">
-        <img src="downloads/stock.3.jpeg" alt="Group 3" class="group-image">
+        <img src="images/stock.3.jpeg" alt="Group 3" class="group-image">
         <span>Media & Gaming</span>
       </div>
     </div>
 
     <!-- Chat Area -->
     <div id="chat-container">
-      <div id="warning-banner">
-        🚨 Attention: Fake news is currently being spread! 🚨
-      </div>
       <div id="chat-window"></div>
       <div id="chat-input-container">
         <input id="chat-input" type="text" placeholder="Type your message...">
