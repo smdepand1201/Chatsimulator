@@ -1,0 +1,34 @@
+name: Test Chat Simulator
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    name: Test on macOS and Windows
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest]
+        node-version: [16]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Start server and test
+        run: |
+          node server.js &
+          sleep 5
+          curl http://localhost:3000
