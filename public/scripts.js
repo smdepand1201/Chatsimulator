@@ -1,28 +1,32 @@
 // Global Variables
 let userName = '';
-let currentGroupId = 1;
+let currentGroupId = 1; // Default group ID
+let renderedMessages = {}; // Tracks rendered messages for each group
+let messageTimers = []; // Stores timers to control message delay
 
-// Show popup warning after 10 seconds
-setTimeout(() => {
-  document.getElementById("popup").style.display = "flex";
-}, 10000);
+// Initialize renderedMessages for all groups
+for (let groupId = 1; groupId <= 3; groupId++) {
+  renderedMessages[groupId] = [];
+}
 
-const popupOkButton = document.getElementById("popup-ok-button");
-popupOkButton.addEventListener("click", () => {
-  document.getElementById("popup").style.display = "none";
-  document.getElementById("name-prompt").style.display = "flex";
-});
-
-// Name prompt
-const nameSubmitButton = document.getElementById("name-submit-button");
-nameSubmitButton.addEventListener("click", () => {
+// Show Name Prompt Once
+document.getElementById("name-prompt").style.display = "flex";
+document.getElementById("name-submit-button").addEventListener("click", () => {
   const usernameInput = document.getElementById("username-input").value.trim();
   if (usernameInput) {
     userName = usernameInput;
     document.getElementById("name-prompt").style.display = "none";
-    document.getElementById("app").style.display = "flex";
-    renderMessages(currentGroupId);
+
+    // Show warning popup after 10 seconds
+    setTimeout(() => {
+      document.getElementById("popup").style.display = "flex";
+    }, 10000);
   }
+});
+
+// Close Warning Popup
+document.getElementById("popup-ok-button").addEventListener("click", () => {
+  document.getElementById("popup").style.display = "none";
 });
 
 // Group Messages
@@ -43,14 +47,16 @@ const groupMessages = {
   ],
 };
 
-// Render Messages with Delay
+// Render Messages with 5-Second Delay (Restart on Group Switch)
 function renderMessages(groupId) {
   const chatWindow = document.getElementById("chat-window");
-  chatWindow.innerHTML = ""; // Clear messages
+  chatWindow.innerHTML = ""; // Clear chat window on group change
+  messageTimers.forEach((timer) => clearTimeout(timer)); // Clear all existing timers
+  messageTimers = []; // Reset timers
 
   const messages = groupMessages[groupId];
   messages.forEach((message, index) => {
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       const messageDiv = document.createElement("div");
       messageDiv.className = `message ${message.sender === userName ? "self" : "other"}`;
 
@@ -67,7 +73,8 @@ function renderMessages(groupId) {
 
       chatWindow.appendChild(messageDiv);
       chatWindow.scrollTop = chatWindow.scrollHeight; // Auto-scroll
-    }, index * 5000); // 5-second delay per message
+    }, index * 5000); // Delay for each message
+    messageTimers.push(timer);
   });
 }
 
@@ -76,8 +83,40 @@ document.getElementById("send-button").addEventListener("click", () => {
   const input = document.getElementById("chat-input");
   const messageText = input.value.trim();
   if (messageText) {
-    groupMessages[currentGroupId].push({ sender: userName, text: messageText });
-    renderMessages(currentGroupId);
-    input.value = "";
+    const userMessage = { sender: userName, text: messageText };
+
+    // Save message to groupMessages
+    groupMessages[currentGroupId].push(userMessage);
+
+    // Render the new message immediately
+    const chatWindow = document.getElementById("chat-window");
+    const messageDiv = document.createElement("div");
+    messageDiv.className = "message self";
+
+    const image = document.createElement("img");
+    image.src = "images/people.1.jpeg";
+    image.alt = "User Photo";
+    image.className = "message-image";
+    messageDiv.appendChild(image);
+
+    const text = document.createElement("span");
+    text.innerText = `${userName}: ${messageText}`;
+    messageDiv.appendChild(text);
+
+    chatWindow.appendChild(messageDiv);
+    chatWindow.scrollTop = chatWindow.scrollHeight; // Auto-scroll
+
+    input.value = ""; // Clear input field
   }
+});
+
+// Group Switching
+document.querySelectorAll(".group").forEach((group) => {
+  group.addEventListener("click", () => {
+    document.querySelectorAll(".group").forEach((g) => g.classList.remove("active"));
+    group.classList.add("active");
+
+    currentGroupId = parseInt(group.dataset.groupId);
+    renderMessages(currentGroupId);
+  });
 });
