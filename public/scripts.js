@@ -3,6 +3,10 @@ let userName = '';
 let currentGroupId = 1; // Default group ID
 let renderedMessages = {}; // Tracks rendered messages for each group
 let messageTimers = []; // Stores timers to control message delay
+let warningTimeoutId = null; // Tracks the warning popup timeout
+
+// Initialize popup state
+document.getElementById("popup").style.display = "none";
 
 // Initialize renderedMessages for all groups
 for (let groupId = 1; groupId <= 3; groupId++) {
@@ -11,14 +15,21 @@ for (let groupId = 1; groupId <= 3; groupId++) {
 
 // Show Name Prompt Once
 document.getElementById("name-prompt").style.display = "flex";
+
+// Ensure event listener is added only once
 document.getElementById("name-submit-button").addEventListener("click", () => {
   const usernameInput = document.getElementById("username-input").value.trim();
   if (usernameInput) {
     userName = usernameInput;
     document.getElementById("name-prompt").style.display = "none";
-
-    // Show warning popup after 10 seconds
-    setTimeout(() => {
+    
+    // Clear any existing timeout before setting a new one
+    if (warningTimeoutId) {
+      clearTimeout(warningTimeoutId);
+    }
+    
+    // Set new timeout
+    warningTimeoutId = setTimeout(() => {
       document.getElementById("popup").style.display = "flex";
     }, 10000);
   }
