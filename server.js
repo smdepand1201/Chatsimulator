@@ -34,9 +34,10 @@ db.serialize(() => {
 
   // Insert default messages if the table is empty
   db.get("SELECT COUNT(*) AS count FROM messages", (err, row) => {
-    if (row.count === 0) {
+    if (row && row.count === 0) {
       db.run(`INSERT INTO messages (group_id, sender, text) VALUES (1, 'Alice', 'Welcome to Group 1!')`);
       db.run(`INSERT INTO messages (group_id, sender, text) VALUES (2, 'Bob', 'Welcome to Group 2!')`);
+      db.run(`INSERT INTO messages (group_id, sender, text) VALUES (3, 'Charlie', 'Welcome to Group 3!')`);
     }
   });
 });
@@ -73,7 +74,6 @@ app.post("/save-message", (req, res) => {
     }
   );
 });
-
 
 // Serve the chat interface (chatsimulator.html)
 app.get("/", (req, res) => {
