@@ -8,26 +8,38 @@ const app = express();
 // Middleware
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, "/"))); // Serve static files (HTML, CSS, JS)
+app.use('/images', express.static(path.join(__dirname, 'images'))); // Serve images explicitly
 
 // Database setup
-const db = new sqlite3.Database("chat.db", (err) => {
+const dbPath = path.join('/tmp', 'chat.db'); // Use writable /tmp directory for Render
+const db = new sqlite3.Database(dbPath, (err) => {
   if (err) {
     console.error("Error opening database:", err.message);
   } else {
-    console.log("Connected to SQLite database.");
+    console.log("Connected to SQLite database at:", dbPath);
   }
 });
 
 // Create the messages table if it doesn't exist
-db.run(
-  `CREATE TABLE IF NOT EXISTS messages (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    group_id INTEGER,
-    sender TEXT,
-    text TEXT,
-    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-  )`
-);
+db.serialize(() => {
+  db.run(`
+    CREATE TABLE IF NOT EXISTS messages (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      group_id INTEGER,
+      sender TEXT,
+      text TEXT,
+      timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  // Insert default messages if the table is empty
+  db.get("SELECT COUNT(*) AS count FROM messages", (err, row) => {
+    if (row.count === 0) {
+      db.run(`INSERT INTO messages (group_id, sender, text) VALUES (1, 'Alice', 'Welcome to Group 1!')`);
+      db.run(`INSERT INTO messages (group_id, sender, text) VALUES (2, 'Bob', 'Welcome to Group 2!')`);
+    }
+  });
+});
 
 // API to get messages for a group
 app.get("/get-messages/:group_id", (req, res) => {
@@ -67,7 +79,7 @@ app.get("/", (req, res) => {
 });
 
 // Start the server on the Render-assigned port
-const PORT = process.env.PORT || 3000; // Use the Render-assigned port or default to 3000
+const PORT = process.env.PORT || 3000; // Use Render's assigned port or default to 3000
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
