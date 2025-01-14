@@ -64,14 +64,16 @@ app.post("/save-message", (req, res) => {
     [group_id, sender, text],
     function (err) {
       if (err) {
-        console.error(err.message);
+        console.error("Error saving message:", err.message); // Logs errors
         res.status(500).send("Error saving message.");
       } else {
+        console.log(`Message saved: ${text} (ID: ${this.lastID})`); // Logs success
         res.json({ id: this.lastID });
       }
     }
   );
 });
+
 
 // Serve the chat interface (chatsimulator.html)
 app.get("/", (req, res) => {
