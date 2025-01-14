@@ -4,49 +4,70 @@ const bodyParser = require("body-parser");
 const path = require("path");
 
 const app = express();
-const db = new sqlite3.Database("chat.db");
 
 // Middleware
 app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, "public"))); // Serve static files from "public"
+app.use(express.static(path.join(__dirname, "/"))); // Serve static files (HTML, CSS, JS)
 
-// Create messages table
+// Database setup
+const db = new sqlite3.Database("chat.db", (err) => {
+  if (err) {
+    console.error("Error opening database:", err.message);
+  } else {
+    console.log("Connected to SQLite database.");
+  }
+});
+
+// Create the messages table if it doesn't exist
 db.run(
-  "CREATE TABLE IF NOT EXISTS messages (id INTEGER PRIMARY KEY, group_id INTEGER, sender TEXT, text TEXT, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)"
+  `CREATE TABLE IF NOT EXISTS messages (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    group_id INTEGER,
+    sender TEXT,
+    text TEXT,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`
 );
 
-// Save a message
-app.post("/save-message", (req, res) => {
-  const { group_id, sender, text } = req.body;
-  if (!group_id || !sender || !text) {
-    return res.status(400).send("Missing required fields");
-  }
-  const query = "INSERT INTO messages (group_id, sender, text) VALUES (?, ?, ?)";
-  db.run(query, [group_id, sender, text], function (err) {
+// API to get messages for a group
+app.get("/get-messages/:group_id", (req, res) => {
+  const groupId = req.params.group_id;
+
+  db.all("SELECT * FROM messages WHERE group_id = ?", [groupId], (err, rows) => {
     if (err) {
-      console.error("Database error:", err.message);
-      return res.status(500).send("Database error");
+      console.error(err.message);
+      res.status(500).send("Error retrieving messages.");
+    } else {
+      res.json(rows);
     }
-    res.status(200).json({ success: true, id: this.lastID });
   });
 });
 
-// Fetch messages for a group
-app.get("/get-messages/:group_id", (req, res) => {
-  const groupId = req.params.group_id;
-  db.all(
-    "SELECT sender, text, timestamp FROM messages WHERE group_id = ? ORDER BY timestamp ASC",
-    [groupId],
-    (err, rows) => {
+// API to save a message
+app.post("/save-message", (req, res) => {
+  const { group_id, sender, text } = req.body;
+
+  db.run(
+    "INSERT INTO messages (group_id, sender, text) VALUES (?, ?, ?)",
+    [group_id, sender, text],
+    function (err) {
       if (err) {
-        return res.status(500).send("Error retrieving messages");
+        console.error(err.message);
+        res.status(500).send("Error saving message.");
+      } else {
+        res.json({ id: this.lastID });
       }
-      res.status(200).json(rows);
     }
   );
 });
 
-// Start the server
-app.listen(3000, () => {
-  console.log("Server running at http://localhost:3000");
+// Serve the chat interface (chatsimulator.html)
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "chatsimulator.html"));
+});
+
+// Start the server on the Render-assigned port
+const PORT = process.env.PORT || 3000; // Use the Render-assigned port or default to 3000
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
